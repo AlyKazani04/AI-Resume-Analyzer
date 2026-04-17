@@ -7,16 +7,16 @@ The layers flow: UI -> Services -> Engine -> Repositories -> Models -> Parsers.
 ## Entry Points
 - `app.py`: Streamlit UI entry point.
 - `services/analyzer_service.py`: Orchestrates parsing, AI analysis, and DB writes.
-- `engine/semantic_engine.py`: OpenAI embeddings + similarity + gap analysis.
+- `engine/semantic_engine.py`: Ollama embeddings + similarity + gap analysis.
 
 ## Configuration
 - Environment variables are loaded in `config/settings.py`.
 - Copy `.env.example` to `.env` and fill in secrets.
 
 Required env vars:
-- `OPENAI_API_KEY`
-- `OPENAI_EMBEDDING_MODEL` (default: text-embedding-3-small)
-- `OPENAI_CHAT_MODEL` (default: gpt-4o-mini)
+- `OLLAMA_EMBEDDING_MODEL` (default: all-minilm-l6-v2)
+- `OLLAMA_CHAT_MODEL` (default: gemma3)
+- `OLLAMA_HOST` (default: http://localhost:11434)
 - `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 
 ## Database
@@ -32,12 +32,12 @@ DB connection is wrapped in `repository/db.py`.
 - Parsers: `parsers/` (PDF/DOCX extraction via pdfplumber/python-docx).
 - Models: `models/` (dataclasses for core entities).
 - Repositories: `repository/` (CRUD on resumes + analysis sessions).
-- Engine: `engine/semantic_engine.py` (OpenAI + cosine similarity + gap report).
+- Engine: `engine/semantic_engine.py` (Ollama + cosine similarity + gap report).
 - Services: `services/analyzer_service.py` (main orchestration).
 - UI: `app.py` (Streamlit components).
 
 ## Known Placeholders
-- `engine/semantic_engine.py` expects Chat Completions response JSON from the model.
+- `engine/semantic_engine.py` expects JSON from the model response.
 - Job descriptions are not yet persisted (future repo needed).
 - User handling is mocked (user_id=1 in UI).
 

@@ -8,7 +8,7 @@ from pathlib import Path
 import streamlit as st
 
 from config.settings import load_settings
-from engine.semantic_engine import OpenAISemanticEngine
+from engine.semantic_engine import OllamaSemanticEngine
 from models.job_description import JobDescription
 from repository.db import Database
 from repository.resume_repo import ResumeRepository
@@ -21,10 +21,10 @@ def build_service() -> ResumeAnalyzerService:
     database = Database(settings["db"])
     resume_repo = ResumeRepository(database)
     session_repo = AnalysisSessionRepository(database)
-    engine = OpenAISemanticEngine(
-        api_key=settings["openai_api_key"],
+    engine = OllamaSemanticEngine(
         embedding_model=settings["embedding_model"],
         chat_model=settings["chat_model"],
+        host=settings["ollama_host"],
     )
     return ResumeAnalyzerService(resume_repo, session_repo, engine)
 

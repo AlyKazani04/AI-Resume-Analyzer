@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from engine.semantic_engine import MatchReport, OpenAISemanticEngine
+from engine.semantic_engine import MatchReport, OllamaSemanticEngine
 from models.analysis_session import AnalysisSession
 from models.job_description import JobDescription
 from models.resume import Resume
@@ -29,7 +29,7 @@ class ResumeAnalyzerService:
         self,
         resume_repo: ResumeRepository,
         session_repo: AnalysisSessionRepository,
-        engine: OpenAISemanticEngine,
+        engine: OllamaSemanticEngine,
     ) -> None:
         self.resume_repo = resume_repo
         self.session_repo = session_repo

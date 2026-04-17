@@ -14,11 +14,9 @@ def load_settings() -> dict:
     load_dotenv()
 
     return {
-        "openai_api_key": os.getenv("OPENAI_API_KEY", ""),
-        "embedding_model": os.getenv(
-            "OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"
-        ),
-        "chat_model": os.getenv("OPENAI_CHAT_MODEL", "gpt-4o-mini"),
+        "embedding_model": os.getenv("OLLAMA_EMBEDDING_MODEL", "all-minilm-l6-v2"),
+        "chat_model": os.getenv("OLLAMA_CHAT_MODEL", "gemma3"),
+        "ollama_host": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
         "db": DBConfig(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),

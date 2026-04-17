@@ -1,4 +1,4 @@
-"""Semantic engine powered by OpenAI embeddings and gap analysis."""
+"""Semantic engine powered by Ollama embeddings and gap analysis."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from openai import OpenAI
+import ollama
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -17,21 +17,22 @@ class MatchReport:
     critique: str
 
 
-class OpenAISemanticEngine:
+class OllamaSemanticEngine:
     """Generate embeddings, compute similarity, and create gap reports."""
 
-    def __init__(self, api_key: str, embedding_model: str, chat_model: str) -> None:
-        self.client = OpenAI(api_key=api_key)
+    def __init__(self, embedding_model: str, chat_model: str, host: str) -> None:
         self.embedding_model = embedding_model
         self.chat_model = chat_model
+        self.host = host
 
     def embed_text(self, text: str) -> List[float]:
-        """Create an embedding vector using OpenAI."""
-        response = self.client.embeddings.create(
+        """Create an embedding vector using Ollama."""
+        response = ollama.embeddings(
             model=self.embedding_model,
-            input=text,
+            prompt=text,
+            host=self.host,
         )
-        return response.data[0].embedding
+        return response.get("embedding", [])
 
     def similarity_score(self, resume_text: str, jd_text: str) -> float:
         """Compute cosine similarity between resume and job description."""
@@ -47,15 +48,16 @@ class OpenAISemanticEngine:
             "Return JSON with keys: score (0-100), missing_keywords (list of 5), critique."
         )
         user_content = f"JOB DESCRIPTION:\n{jd_text}\n\nRESUME:\n{resume_text}"
-        response = self.client.chat.completions.create(
+        response = ollama.chat(
             model=self.chat_model,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": user_content},
             ],
-            temperature=0.2,
+            options={"temperature": 0.2},
+            host=self.host,
         )
-        payload = response.choices[0].message.content or "{}"
+        payload = response.get("message", {}).get("content", "{}")
         data: Dict[str, Any] = json.loads(payload)
         return MatchReport(
             score=float(data.get("score", 0)),

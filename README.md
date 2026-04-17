@@ -1,5 +1,5 @@
 # AI Resume Analyzer
-Streamlit app that analyzes resumes against job descriptions using OpenAI embeddings.
+Streamlit app that analyzes resumes against job descriptions using local Ollama models.
 
 ## Quick Start
 1. Create `.env` from `.env.example` and fill in values.
