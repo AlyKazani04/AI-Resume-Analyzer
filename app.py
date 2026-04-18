@@ -14,7 +14,10 @@ from repository.db import Database
 from repository.resume_repo import ResumeRepository
 from repository.session_repo import AnalysisSessionRepository
 from services.analyzer_service import ResumeAnalyzerService
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
+os.getenv("DB_NAME")
 
 def build_service() -> ResumeAnalyzerService:
     settings = load_settings()
