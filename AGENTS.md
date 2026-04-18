@@ -7,6 +7,7 @@ The layers flow: UI -> Services -> Engine -> Repositories -> Models -> Parsers.
 ## Entry Points
 - `app.py`: Streamlit UI entry point.
 - `services/analyzer_service.py`: Orchestrates parsing, AI analysis, and DB writes.
+- `services/auth_service.py`: Handles registration and login.
 - `engine/semantic_engine.py`: Ollama embeddings + similarity + gap analysis.
 
 ## Configuration
@@ -32,6 +33,7 @@ DB connection is wrapped in `repository/db.py`.
 - Parsers: `parsers/` (PDF/DOCX extraction via pdfplumber/python-docx).
 - Models: `models/` (dataclasses for core entities).
 - Repositories: `repository/` (CRUD on resumes + analysis sessions).
+- Repositories: `repository/user_repo.py` (CRUD on users).
 - Engine: `engine/semantic_engine.py` (Ollama + cosine similarity + gap report).
 - Services: `services/analyzer_service.py` (main orchestration).
 - UI: `app.py` (Streamlit components).
@@ -40,6 +42,7 @@ DB connection is wrapped in `repository/db.py`.
 - `engine/semantic_engine.py` expects JSON from the model response.
 - Job descriptions are not yet persisted (future repo needed).
 - User handling is mocked (user_id=1 in UI).
+- UI now supports login/register and guest mode (no DB writes).
 
 ## Suggested Next Steps
 1. Implement `JobDescriptionRepository` to persist job descriptions.

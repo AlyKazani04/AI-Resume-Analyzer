@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
@@ -24,13 +25,13 @@ class OllamaSemanticEngine:
         self.embedding_model = embedding_model
         self.chat_model = chat_model
         self.host = host
+        self.client = ollama.Client(host=self.host)
 
     def embed_text(self, text: str) -> List[float]:
         """Create an embedding vector using Ollama."""
-        response = ollama.embeddings(
+        response = self.client.embeddings(
             model=self.embedding_model,
             prompt=text,
-            host=self.host,
         )
         return response.get("embedding", [])
 
@@ -45,22 +46,44 @@ class OllamaSemanticEngine:
         """Generate a strict recruiter-style gap report."""
         prompt = (
             "You are a strict recruiter. Compare the resume against the job description. "
-            "Return JSON with keys: score (0-100), missing_keywords (list of 5), critique."
+            "Return ONLY valid JSON with keys: score (0-100), missing_keywords (list of 5), critique. "
+            "Do not include markdown or extra text. Example: "
+            '{"score": 72, "missing_keywords": ["sql", "aws"], "critique": "..."}'
         )
-        user_content = f"JOB DESCRIPTION:\n{jd_text}\n\nRESUME:\n{resume_text}"
-        response = ollama.chat(
+        user_content = (
+            "JOB DESCRIPTION:\n"
+            f"{jd_text}\n\n"
+            "RESUME:\n"
+            f"{resume_text}"
+        )
+        response = self.client.chat(
             model=self.chat_model,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": user_content},
             ],
             options={"temperature": 0.2},
-            host=self.host,
         )
-        payload = response.get("message", {}).get("content", "{}")
-        data: Dict[str, Any] = json.loads(payload)
+        payload = response.get("message", {}).get("content", "")
+        data = self._safe_parse_json(payload)
         return MatchReport(
             score=float(data.get("score", 0)),
             missing_keywords=list(data.get("missing_keywords", [])),
-            critique=str(data.get("critique", "")),
+            critique=str(data.get("critique", payload.strip())),
         )
+
+    @staticmethod
+    def _safe_parse_json(payload: str) -> Dict[str, Any]:
+        """Parse JSON content with a simple recovery fallback."""
+        if not payload:
+            return {}
+        try:
+            return json.loads(payload)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", payload, re.DOTALL)
+            if match:
+                try:
+                    return json.loads(match.group(0))
+                except json.JSONDecodeError:
+                    return {}
+            return {}

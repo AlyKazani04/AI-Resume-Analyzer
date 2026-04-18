@@ -51,26 +51,28 @@ class ResumeAnalyzerService:
         self,
         resume: Resume,
         job_description: JobDescription,
-        user_id: int,
+        user_id: int | None,
+        persist: bool = True,
     ) -> AnalysisResult:
-        """Analyze resume vs job description and persist results."""
-        resume.user_id = user_id
-        resume_id = self.resume_repo.create(resume)
-
+        """Analyze resume vs job description and optionally persist results."""
         report = self.engine.gap_analysis(resume.content, job_description.content)
         score = self.engine.similarity_score(resume.content, job_description.content)
 
-        session = AnalysisSession(
-            id=None,
-            user_id=user_id,
-            resume_id=resume_id,
-            jd_id=job_description.id or 0,
-            similarity_score=score,
-            gap_report=report.critique,
-        )
-        session_id = self.session_repo.create(session)
-        _ = session_id
+        resume_id = 0
+        jd_id = job_description.id or 0
 
-        return AnalysisResult(
-            resume_id=resume_id, jd_id=job_description.id or 0, report=report
-        )
+        if persist and user_id is not None:
+            resume.user_id = user_id
+            resume_id = self.resume_repo.create(resume)
+            session = AnalysisSession(
+                id=None,
+                user_id=user_id,
+                resume_id=resume_id,
+                jd_id=jd_id,
+                similarity_score=score,
+                gap_report=report.critique,
+            )
+            session_id = self.session_repo.create(session)
+            _ = session_id
+
+        return AnalysisResult(resume_id=resume_id, jd_id=jd_id, report=report)
