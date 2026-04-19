@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
-from engine.semantic_engine import MatchReport, OpenAISemanticEngine
+from engine.semantic_engine import MatchReport, OllamaSemanticEngine
 from models.analysis_session import AnalysisSession
 from models.job_description import JobDescription
 from models.resume import Resume
@@ -29,7 +29,7 @@ class ResumeAnalyzerService:
         self,
         resume_repo: ResumeRepository,
         session_repo: AnalysisSessionRepository,
-        engine: OpenAISemanticEngine,
+        engine: OllamaSemanticEngine,
     ) -> None:
         self.resume_repo = resume_repo
         self.session_repo = session_repo
@@ -51,26 +51,28 @@ class ResumeAnalyzerService:
         self,
         resume: Resume,
         job_description: JobDescription,
-        user_id: int,
+        user_id: int | None,
+        persist: bool = True,
     ) -> AnalysisResult:
-        """Analyze resume vs job description and persist results."""
-        resume.user_id = user_id
-        resume_id = self.resume_repo.create(resume)
-
+        """Analyze resume vs job description and optionally persist results."""
         report = self.engine.gap_analysis(resume.content, job_description.content)
         score = self.engine.similarity_score(resume.content, job_description.content)
 
-        session = AnalysisSession(
-            id=None,
-            user_id=user_id,
-            resume_id=resume_id,
-            jd_id=job_description.id or 0,
-            similarity_score=score,
-            gap_report=report.critique,
-        )
-        session_id = self.session_repo.create(session)
-        _ = session_id
+        resume_id = 0
+        jd_id = job_description.id or 0
 
-        return AnalysisResult(
-            resume_id=resume_id, jd_id=job_description.id or 0, report=report
-        )
+        if persist and user_id is not None:
+            resume.user_id = user_id
+            resume_id = self.resume_repo.create(resume)
+            session = AnalysisSession(
+                id=None,
+                user_id=user_id,
+                resume_id=resume_id,
+                jd_id=jd_id,
+                similarity_score=score,
+                gap_report=report.critique,
+            )
+            session_id = self.session_repo.create(session)
+            _ = session_id
+
+        return AnalysisResult(resume_id=resume_id, jd_id=jd_id, report=report)
