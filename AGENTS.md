@@ -15,7 +15,7 @@ The layers flow: UI -> Services -> Engine -> Repositories -> Models -> Parsers.
 - Copy `.env.example` to `.env` and fill in secrets.
 
 Required env vars:
-- `OLLAMA_EMBEDDING_MODEL` (default: all-minilm-l6-v2)
+- `OLLAMA_EMBEDDING_MODEL` (default: nomic-embed-text)
 - `OLLAMA_CHAT_MODEL` (default: gemma3)
 - `OLLAMA_HOST` (default: http://localhost:11434)
 - `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
