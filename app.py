@@ -473,17 +473,32 @@ def render_keywords(keywords: list | str) -> None:
 
 def build_services() -> tuple[ResumeAnalyzerService, AuthService]:
     settings = load_settings()
+
     database = Database(settings["db"])
+
+    
     resume_repo = ResumeRepository(database)
     session_repo = AnalysisSessionRepository(database)
     user_repo = UserRepository(database)
+
+    from repository.job_description_repo import JobDescriptionRepository
+    jd_repo = JobDescriptionRepository(database)
+
     engine = OllamaSemanticEngine(
         embedding_model=settings["embedding_model"],
         chat_model=settings["chat_model"],
         host=settings["ollama_host"],
     )
-    analyzer = ResumeAnalyzerService(resume_repo, session_repo, engine)
+
+    analyzer = ResumeAnalyzerService(
+        resume_repo,
+        session_repo,
+        jd_repo,
+        engine
+    )
+
     auth = AuthService(user_repo)
+
     return analyzer, auth
 
 

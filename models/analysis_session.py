@@ -10,9 +10,8 @@ from typing import Optional
 @dataclass
 class AnalysisSession:
     id: Optional[int]
-    user_id: int
     resume_id: int
-    jd_id: int
     similarity_score: float
     gap_report: str
-    analyzed_at: Optional[datetime] = None
+
+    missing_keywords: list | None = None

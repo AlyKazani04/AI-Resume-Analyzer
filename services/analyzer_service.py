@@ -13,7 +13,7 @@ from parsers.docx_parser import DocxParser
 from parsers.pdf_parser import PDFParser
 from repository.resume_repo import ResumeRepository
 from repository.session_repo import AnalysisSessionRepository
-
+from repository.job_description_repo import JobDescriptionRepository
 
 @dataclass
 class AnalysisResult:
@@ -29,10 +29,12 @@ class ResumeAnalyzerService:
         self,
         resume_repo: ResumeRepository,
         session_repo: AnalysisSessionRepository,
+        jd_repo: JobDescriptionRepository,
         engine: OllamaSemanticEngine,
     ) -> None:
         self.resume_repo = resume_repo
         self.session_repo = session_repo
+        self.jd_repo = jd_repo
         self.engine = engine
         self.pdf_parser = PDFParser()
         self.docx_parser = DocxParser()
@@ -59,19 +61,24 @@ class ResumeAnalyzerService:
         score = self.engine.similarity_score(resume.content, job_description.content)
 
         resume_id = 0
-        jd_id = job_description.id or 0
+        jd_id = 0
+        ##jd_id = job_description.id or 0
 
         if persist and user_id is not None:
             resume.user_id = user_id
             resume_id = self.resume_repo.create(resume)
+
+            jd_id = self.jd_repo.create(job_description)
+
+
             session = AnalysisSession(
                 id=None,
-                user_id=user_id,
                 resume_id=resume_id,
-                jd_id=jd_id,
                 similarity_score=score,
                 gap_report=report.critique,
             )
+            session.missing_keywords = report.missing_keywords
+
             session_id = self.session_repo.create(session)
             _ = session_id
 
