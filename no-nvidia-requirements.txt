@@ -1,0 +1,48 @@
+# --- Core UI and Framework ---
+streamlit==1.56.0
+ollama==0.6.1
+openai==2.32.0
+python-dotenv==1.2.2
+
+# --- Data Science & Processing ---
+numpy==2.4.3
+pandas==3.0.2
+scipy==1.17.1
+scikit-learn==1.8.0
+networkx==3.6.1
+altair==6.0.0
+pyarrow==23.0.1
+
+# --- Machine Learning (Hardware Agnostic) ---
+# Note: These will use CPU, AMD (ROCm), or Mac (MPS) automatically 
+torch==2.11.0
+transformers==5.5.4
+sentence-transformers==5.4.1
+safetensors==0.7.0
+tokenizers==0.22.2
+
+# --- Document & File Parsing ---
+pdfplumber==0.11.9
+PyPDF2==3.0.1
+pypdfium2==5.7.0
+pdfminer.six==20251230
+python-docx==1.2.0
+lxml==6.0.4
+Pillow==12.2.0
+
+# --- Database & Backend ---
+mysql-connector-python==9.6.0
+cryptography==46.0.7
+bcrypt==5.0.0
+requests==2.32.5
+httpx==0.28.1
+huggingface_hub==1.11.0
+
+# --- Utilities ---
+tqdm==4.67.3
+rich==15.0.0
+typer==0.24.1
+pydantic==2.13.1
+jsonschema==4.26.0
+python-dateutil==2.9.0.post0
+watchdog==6.0.0
