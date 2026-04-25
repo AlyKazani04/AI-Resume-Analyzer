@@ -11,9 +11,9 @@ from models.job_description import JobDescription
 from models.resume import Resume
 from parsers.docx_parser import DocxParser
 from parsers.pdf_parser import PDFParser
+from repository.job_description_repo import JobDescriptionRepository
 from repository.resume_repo import ResumeRepository
 from repository.session_repo import AnalysisSessionRepository
-from repository.job_description_repo import JobDescriptionRepository
 
 @dataclass
 class AnalysisResult:
@@ -61,8 +61,7 @@ class ResumeAnalyzerService:
         score = self.engine.similarity_score(resume.content, job_description.content)
 
         resume_id = 0
-        jd_id = 0
-        ##jd_id = job_description.id or 0
+        jd_id = job_description.id or 0
 
         if persist and user_id is not None:
             resume.user_id = user_id
@@ -73,7 +72,9 @@ class ResumeAnalyzerService:
 
             session = AnalysisSession(
                 id=None,
+                user_id=user_id,
                 resume_id=resume_id,
+                jd_id=jd_id,
                 similarity_score=score,
                 gap_report=report.critique,
             )
