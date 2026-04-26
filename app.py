@@ -11,6 +11,7 @@ from config.settings import load_settings
 from engine.semantic_engine import OllamaSemanticEngine
 from models.job_description import JobDescription
 from repository.db import Database
+from repository.job_description_repo import JobDescriptionRepository
 from repository.resume_repo import ResumeRepository
 from repository.session_repo import AnalysisSessionRepository
 from repository.user_repo import UserRepository
@@ -407,13 +408,17 @@ def score_label(score: float) -> str:
 
 def score_description(score: float) -> str:
     if score >= 80:
-        return "Your resume strongly aligns with this role. You're a compelling candidate."
+        return (
+            "Your resume strongly aligns with this role. You're a compelling candidate."
+        )
     elif score >= 60:
         return "Solid alignment. A few targeted tweaks could make you a top applicant."
     elif score >= 40:
         return "There's a reasonable fit, but several key gaps need to be addressed."
     else:
-        return "Significant gaps detected. Consider tailoring your resume for this role."
+        return (
+            "Significant gaps detected. Consider tailoring your resume for this role."
+        )
 
 
 def render_score_card(score: float) -> None:
@@ -457,14 +462,19 @@ def render_score_card(score: float) -> None:
 
 def render_keywords(keywords: list | str) -> None:
     if isinstance(keywords, str):
-        items = [k.strip() for k in keywords.replace(",", "\n").splitlines() if k.strip()]
+        items = [
+            k.strip() for k in keywords.replace(",", "\n").splitlines() if k.strip()
+        ]
     elif isinstance(keywords, list):
         items = [str(k).strip() for k in keywords if str(k).strip()]
     else:
         items = []
 
     if not items:
-        st.markdown('<p style="color:#5a6480;font-size:0.9rem;">No missing keywords detected.</p>', unsafe_allow_html=True)
+        st.markdown(
+            '<p style="color:#5a6480;font-size:0.9rem;">No missing keywords detected.</p>',
+            unsafe_allow_html=True,
+        )
         return
 
     pills = "".join(f'<span class="keyword-pill">{k}</span>' for k in items)
@@ -473,17 +483,25 @@ def render_keywords(keywords: list | str) -> None:
 
 def build_services() -> tuple[ResumeAnalyzerService, AuthService]:
     settings = load_settings()
+
     database = Database(settings["db"])
+
     resume_repo = ResumeRepository(database)
     session_repo = AnalysisSessionRepository(database)
     user_repo = UserRepository(database)
+
+    jd_repo = JobDescriptionRepository(database)
+
     engine = OllamaSemanticEngine(
         embedding_model=settings["embedding_model"],
         chat_model=settings["chat_model"],
         host=settings["ollama_host"],
     )
-    analyzer = ResumeAnalyzerService(resume_repo, session_repo, engine)
+
+    analyzer = ResumeAnalyzerService(resume_repo, session_repo, jd_repo, engine)
+
     auth = AuthService(user_repo)
+
     return analyzer, auth
 
 
@@ -524,10 +542,25 @@ def main() -> None:
         login_tab, register_tab, guest_tab = st.tabs(["Login", "Register", "Guest"])
 
         with login_tab:
-            st.markdown('<span class="section-label">Email</span>', unsafe_allow_html=True)
-            login_email = st.text_input(" ", key="login_email", label_visibility="collapsed", placeholder="you@example.com")
-            st.markdown('<span class="section-label">Password</span>', unsafe_allow_html=True)
-            login_password = st.text_input(" ", type="password", key="login_pw", label_visibility="collapsed", placeholder="••••••••")
+            st.markdown(
+                '<span class="section-label">Email</span>', unsafe_allow_html=True
+            )
+            login_email = st.text_input(
+                " ",
+                key="login_email",
+                label_visibility="collapsed",
+                placeholder="you@example.com",
+            )
+            st.markdown(
+                '<span class="section-label">Password</span>', unsafe_allow_html=True
+            )
+            login_password = st.text_input(
+                " ",
+                type="password",
+                key="login_pw",
+                label_visibility="collapsed",
+                placeholder="••••••••",
+            )
             if st.button("Login", key="btn_login"):
                 user = auth.authenticate_user(login_email, login_password)
                 if user:
@@ -539,12 +572,34 @@ def main() -> None:
                     st.error("Invalid email or password.")
 
         with register_tab:
-            st.markdown('<span class="section-label">Full Name</span>', unsafe_allow_html=True)
-            reg_name = st.text_input(" ", key="reg_name", label_visibility="collapsed", placeholder="Jane Doe")
-            st.markdown('<span class="section-label">Email</span>', unsafe_allow_html=True)
-            reg_email = st.text_input(" ", key="reg_email", label_visibility="collapsed", placeholder="you@example.com")
-            st.markdown('<span class="section-label">Password</span>', unsafe_allow_html=True)
-            reg_password = st.text_input(" ", type="password", key="reg_pw", label_visibility="collapsed", placeholder="Choose a strong password")
+            st.markdown(
+                '<span class="section-label">Full Name</span>', unsafe_allow_html=True
+            )
+            reg_name = st.text_input(
+                " ",
+                key="reg_name",
+                label_visibility="collapsed",
+                placeholder="Jane Doe",
+            )
+            st.markdown(
+                '<span class="section-label">Email</span>', unsafe_allow_html=True
+            )
+            reg_email = st.text_input(
+                " ",
+                key="reg_email",
+                label_visibility="collapsed",
+                placeholder="you@example.com",
+            )
+            st.markdown(
+                '<span class="section-label">Password</span>', unsafe_allow_html=True
+            )
+            reg_password = st.text_input(
+                " ",
+                type="password",
+                key="reg_pw",
+                label_visibility="collapsed",
+                placeholder="Choose a strong password",
+            )
             if st.button("Create Account", key="btn_register"):
                 if not reg_name or not reg_email or not reg_password:
                     st.error("Please fill in all fields.")
@@ -596,7 +651,9 @@ def main() -> None:
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.markdown('<span class="section-label">Job Description</span>', unsafe_allow_html=True)
+        st.markdown(
+            '<span class="section-label">Job Description</span>', unsafe_allow_html=True
+        )
         jd_text = st.text_area(
             " ",
             placeholder="Paste the job description here…",
@@ -604,7 +661,9 @@ def main() -> None:
             label_visibility="collapsed",
         )
     with col2:
-        st.markdown('<span class="section-label">Job Title</span>', unsafe_allow_html=True)
+        st.markdown(
+            '<span class="section-label">Job Title</span>', unsafe_allow_html=True
+        )
         jd_title = st.text_input(
             " ",
             placeholder="e.g. Senior Backend Engineer",
@@ -626,7 +685,12 @@ def main() -> None:
                 file_path = Path(tmp_dir) / uploaded_file.name
                 file_path.write_bytes(uploaded_file.getbuffer())
                 resume = analyzer.parse_resume(str(file_path))
-                job_description = JobDescription(id=None, title=jd_title or "Untitled Role", content=jd_text)
+                job_description = JobDescription(
+                    id=None,
+                    user_id=None,
+                    title=jd_title or "Untitled Role",
+                    content=jd_text,
+                )
                 persist = st.session_state.user_id is not None
                 result = analyzer.analyze(
                     resume,
@@ -638,7 +702,7 @@ def main() -> None:
         st.markdown("<hr>", unsafe_allow_html=True)
 
         st.markdown(
-            '<h2 style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800;'
+            "<h2 style=\"font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;"
             'color:#f0f2f8;margin:0 0 0.2rem 0;">Match Report</h2>'
             f'<p style="color:#5a6480;font-size:0.85rem;margin:0 0 1.5rem 0;">For: {jd_title or "Untitled Role"}</p>',
             unsafe_allow_html=True,

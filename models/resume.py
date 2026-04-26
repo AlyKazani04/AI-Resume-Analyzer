@@ -13,4 +13,6 @@ class Resume:
     user_id: int
     filename: str
     content: str
+    content_hash: Optional[str] = None
+    file_type: Optional[str] = None
     uploaded_at: Optional[datetime] = None
