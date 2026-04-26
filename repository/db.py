@@ -29,4 +29,3 @@ class Database:
             password=self.config.password,
             database=self.config.database,
         )
-    

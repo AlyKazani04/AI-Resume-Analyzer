@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
-from typing import Optional
 
 from engine.semantic_engine import MatchReport, OllamaSemanticEngine
 from models.analysis_session import AnalysisSession
@@ -15,6 +14,7 @@ from parsers.pdf_parser import PDFParser
 from repository.job_description_repo import JobDescriptionRepository
 from repository.resume_repo import ResumeRepository
 from repository.session_repo import AnalysisSessionRepository
+
 
 @dataclass
 class AnalysisResult:
@@ -82,14 +82,17 @@ class ResumeAnalyzerService:
             if not resume.content_hash:
                 resume.content_hash = self._hash_content(resume.content)
             if not resume.file_type:
-                resume.file_type = "pdf" if resume.filename.lower().endswith(".pdf") else "docx"
+                resume.file_type = (
+                    "pdf" if resume.filename.lower().endswith(".pdf") else "docx"
+                )
             resume_id = self.resume_repo.create(resume)
 
             job_description.user_id = user_id
             if not job_description.content_hash:
-                job_description.content_hash = self._hash_content(job_description.content)
+                job_description.content_hash = self._hash_content(
+                    job_description.content
+                )
             jd_id = self.jd_repo.create(job_description)
-
 
             session = AnalysisSession(
                 id=None,

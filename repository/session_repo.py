@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from typing import Iterable
 
 from models.analysis_session import AnalysisSession
 from repository.db import Database
-import json
 
 
 class AnalysisSessionRepository:
@@ -15,26 +15,31 @@ class AnalysisSessionRepository:
     def __init__(self, database: Database) -> None:
         self.database = database
 
-    def create(self, session):
+    def create(self, session) -> int:
         query = """
         INSERT INTO analysis_sessions (user_id, resume_id, jd_id, similarity_score, gap_report, missing_keywords)
         VALUES (%s, %s, %s, %s, %s, %s)
         """
-        missing_json = json.dumps(session.missing_keywords) if session.missing_keywords else None
+        missing_json = (
+            json.dumps(session.missing_keywords) if session.missing_keywords else None
+        )
 
         with self.database.connect() as connection:
             cursor = connection.cursor()
-            cursor.execute(query, (
-                session.user_id,
-                session.resume_id,
-                session.jd_id,
-                session.similarity_score,
-                session.gap_report,
-                missing_json
-            ))
+            cursor.execute(
+                query,
+                (
+                    session.user_id,
+                    session.resume_id,
+                    session.jd_id,
+                    session.similarity_score,
+                    session.gap_report,
+                    missing_json,
+                ),
+            )
             connection.commit()
             return int(cursor.lastrowid)
-    
+
     def list_by_user(self, user_id: int) -> Iterable[AnalysisSession]:
         """List analysis sessions for a user."""
         query = (
