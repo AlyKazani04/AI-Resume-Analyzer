@@ -43,7 +43,7 @@ class AnalysisSessionRepository:
         )
         with self.database.connect() as connection:
             cursor = connection.cursor()
-            cursor.execute(query)
+            cursor.execute(query, (user_id,))
             rows = cursor.fetchall()
 
         for row in rows:
@@ -53,10 +53,10 @@ class AnalysisSessionRepository:
                 resume_id=row[2],
                 jd_id=row[3],
                 similarity_score=float(row[4]),
-                gap_report=row[6],
+                gap_report=row[5],
                 analyzed_at=row[7],
             )
-            session.missing_keywords = json.loads(row[5]) if row[5] else []
+            session.missing_keywords = json.loads(row[6]) if row[6] else []
             yield session
 
     def list_all(self) -> Iterable[AnalysisSession]:
@@ -64,7 +64,7 @@ class AnalysisSessionRepository:
         query = """
         SELECT id, user_id, resume_id, jd_id, similarity_score, missing_keywords, gap_report, analyzed_at
         FROM analysis_sessions
-        ORDER BY created_at DESC
+        ORDER BY analyzed_at DESC
         """
 
         with self.database.connect() as connection:

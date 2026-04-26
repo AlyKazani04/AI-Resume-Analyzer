@@ -642,7 +642,12 @@ def main() -> None:
                 file_path = Path(tmp_dir) / uploaded_file.name
                 file_path.write_bytes(uploaded_file.getbuffer())
                 resume = analyzer.parse_resume(str(file_path))
-                job_description = JobDescription(id=None, title=jd_title or "Untitled Role", content=jd_text)
+                job_description = JobDescription(
+                    id=None,
+                    user_id=None,
+                    title=jd_title or "Untitled Role",
+                    content=jd_text,
+                )
                 persist = st.session_state.user_id is not None
                 result = analyzer.analyze(
                     resume,
