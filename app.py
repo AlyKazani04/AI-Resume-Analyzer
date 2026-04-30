@@ -6,6 +6,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from repository.job_description_repo import JobDescriptionRepository
 import streamlit as st
 
 from config.settings import load_settings
@@ -26,8 +27,10 @@ os.getenv("DB_NAME")
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
 
+
 def inject_css() -> None:
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     html, body, [data-testid="stAppViewContainer"] {
         background-color: #f5f4f0 !important;
@@ -255,30 +258,49 @@ def inject_css() -> None:
     ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+
 def score_color(score: float) -> str:
-    if score >= 80: return "#10b981"
-    elif score >= 60: return "#6366f1"
-    elif score >= 40: return "#f59e0b"
-    else: return "#ef4444"
+    if score >= 80:
+        return "#10b981"
+    elif score >= 60:
+        return "#6366f1"
+    elif score >= 40:
+        return "#f59e0b"
+    else:
+        return "#ef4444"
 
 
 def score_label(score: float) -> str:
-    if score >= 80: return "Excellent Match"
-    elif score >= 60: return "Good Match"
-    elif score >= 40: return "Moderate Match"
-    else: return "Low Match"
+    if score >= 80:
+        return "Excellent Match"
+    elif score >= 60:
+        return "Good Match"
+    elif score >= 40:
+        return "Moderate Match"
+    else:
+        return "Low Match"
 
 
 def score_description(score: float) -> str:
-    if score >= 80: return "Your resume strongly aligns with this role. You're a compelling candidate."
-    elif score >= 60: return "Solid alignment. A few targeted tweaks could make you stand out."
-    elif score >= 40: return "Reasonable fit, but several key gaps need to be addressed."
-    else: return "Significant gaps detected. Consider tailoring your resume for this role."
+    if score >= 80:
+        return (
+            "Your resume strongly aligns with this role. You're a compelling candidate."
+        )
+    elif score >= 60:
+        return "Solid alignment. A few targeted tweaks could make you stand out."
+    elif score >= 40:
+        return "Reasonable fit, but several key gaps need to be addressed."
+    else:
+        return (
+            "Significant gaps detected. Consider tailoring your resume for this role."
+        )
 
 
 def stream_text(text: str):
@@ -294,7 +316,8 @@ def render_score_card(score: float) -> None:
     dash = (pct / 100) * circumference
     gap = circumference - dash
     color = score_color(pct)
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="score-container">
         <div class="score-ring-wrap">
             <svg width="110" height="110" viewBox="0 0 110 110">
@@ -309,18 +332,25 @@ def render_score_card(score: float) -> None:
             <div class="score-desc">{score_description(pct)}</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_keywords(keywords: list | str) -> None:
     if isinstance(keywords, str):
-        items = [k.strip() for k in keywords.replace(",", "\n").splitlines() if k.strip()]
+        items = [
+            k.strip() for k in keywords.replace(",", "\n").splitlines() if k.strip()
+        ]
     elif isinstance(keywords, list):
         items = [str(k).strip() for k in keywords if str(k).strip()]
     else:
         items = []
     if not items:
-        st.markdown('<p style="color:#9ca3af;font-size:0.88rem;">No missing keywords detected.</p>', unsafe_allow_html=True)
+        st.markdown(
+            '<p style="color:#9ca3af;font-size:0.88rem;">No missing keywords detected.</p>',
+            unsafe_allow_html=True,
+        )
         return
     pills = "".join(f'<span class="keyword-pill">{k}</span>' for k in items)
     st.markdown(f'<div class="keyword-grid">{pills}</div>', unsafe_allow_html=True)
@@ -339,11 +369,14 @@ def session_badge_html(score: float) -> str:
 
 # ── Nav ───────────────────────────────────────────────────────────────────────
 
+
 def render_nav() -> None:
     label = "Guest Session" if st.session_state.guest_mode else "Signed in"
     col_logo, col_badge, col_hist, col_logout = st.columns([3, 2, 1.2, 1])
     with col_logo:
-        st.markdown('<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True
+        )
     with col_badge:
         st.markdown(
             f'<div class="nav-badge"><span class="nav-dot"></span>{label}</div>',
@@ -368,8 +401,10 @@ def render_nav() -> None:
 
 # ── Pages ─────────────────────────────────────────────────────────────────────
 
+
 def page_auth(auth: AuthService) -> None:
-    st.markdown("""
+    st.markdown(
+        """
     <div class="hero-header">
         <span class="hero-eyebrow">AI-Powered Career Tool</span>
         <h1 class="hero-title">Resume <span>Analyzer</span></h1>
@@ -379,16 +414,31 @@ def page_auth(auth: AuthService) -> None:
         </p>
         <div class="hero-divider"></div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown('<div class="auth-card">', unsafe_allow_html=True)
     login_tab, register_tab, guest_tab = st.tabs(["Login", "Register", "Guest"])
 
     with login_tab:
         st.markdown('<span class="section-label">Email</span>', unsafe_allow_html=True)
-        login_email = st.text_input(" ", key="login_email", label_visibility="collapsed", placeholder="you@example.com")
-        st.markdown('<span class="section-label">Password</span>', unsafe_allow_html=True)
-        login_password = st.text_input(" ", type="password", key="login_pw", label_visibility="collapsed", placeholder="••••••••")
+        login_email = st.text_input(
+            " ",
+            key="login_email",
+            label_visibility="collapsed",
+            placeholder="you@example.com",
+        )
+        st.markdown(
+            '<span class="section-label">Password</span>', unsafe_allow_html=True
+        )
+        login_password = st.text_input(
+            " ",
+            type="password",
+            key="login_pw",
+            label_visibility="collapsed",
+            placeholder="••••••••",
+        )
         if st.button("Login →", key="btn_login"):
             user = auth.authenticate_user(login_email, login_password)
             if user:
@@ -400,12 +450,29 @@ def page_auth(auth: AuthService) -> None:
                 st.error("Invalid email or password.")
 
     with register_tab:
-        st.markdown('<span class="section-label">Full Name</span>', unsafe_allow_html=True)
-        reg_name = st.text_input(" ", key="reg_name", label_visibility="collapsed", placeholder="Jane Doe")
+        st.markdown(
+            '<span class="section-label">Full Name</span>', unsafe_allow_html=True
+        )
+        reg_name = st.text_input(
+            " ", key="reg_name", label_visibility="collapsed", placeholder="Jane Doe"
+        )
         st.markdown('<span class="section-label">Email</span>', unsafe_allow_html=True)
-        reg_email = st.text_input(" ", key="reg_email", label_visibility="collapsed", placeholder="you@example.com")
-        st.markdown('<span class="section-label">Password</span>', unsafe_allow_html=True)
-        reg_password = st.text_input(" ", type="password", key="reg_pw", label_visibility="collapsed", placeholder="Choose a strong password")
+        reg_email = st.text_input(
+            " ",
+            key="reg_email",
+            label_visibility="collapsed",
+            placeholder="you@example.com",
+        )
+        st.markdown(
+            '<span class="section-label">Password</span>', unsafe_allow_html=True
+        )
+        reg_password = st.text_input(
+            " ",
+            type="password",
+            key="reg_pw",
+            label_visibility="collapsed",
+            placeholder="Choose a strong password",
+        )
         if st.button("Create Account →", key="btn_register"):
             if not reg_name or not reg_email or not reg_password:
                 st.error("Please fill in all fields.")
@@ -423,7 +490,10 @@ def page_auth(auth: AuthService) -> None:
             "</p>",
             unsafe_allow_html=True,
         )
-        st.markdown('<div class="info-strip">⚡ Guest sessions are temporary and won\'t appear in history.</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="info-strip">⚡ Guest sessions are temporary and won\'t appear in history.</div>',
+            unsafe_allow_html=True,
+        )
         if st.button("Continue as Guest →", key="btn_guest"):
             st.session_state.guest_mode = True
             st.session_state.page = "analyze"
@@ -435,24 +505,51 @@ def page_auth(auth: AuthService) -> None:
 def page_analyze(analyzer: ResumeAnalyzerService) -> None:
     render_nav()
 
-    st.markdown('<h2 class="page-title">Analyze your Resume</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">Upload your resume and paste a job description to get your match report.</p>', unsafe_allow_html=True)
+    st.markdown(
+        '<h2 class="page-title">Analyze your Resume</h2>', unsafe_allow_html=True
+    )
+    st.markdown(
+        '<p class="page-sub">Upload your resume and paste a job description to get your match report.</p>',
+        unsafe_allow_html=True,
+    )
 
-    st.markdown('<span class="section-label">Resume — PDF or DOCX</span>', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader(" ", type=["pdf", "docx"], label_visibility="collapsed")
+    st.markdown(
+        '<span class="section-label">Resume — PDF or DOCX</span>',
+        unsafe_allow_html=True,
+    )
+    uploaded_file = st.file_uploader(
+        " ", type=["pdf", "docx"], label_visibility="collapsed"
+    )
 
     col1, col2 = st.columns([2, 1])
     with col1:
-        st.markdown('<span class="section-label">Job Description</span>', unsafe_allow_html=True)
-        jd_text = st.text_area(" ", placeholder="Paste the full job description here…", height=200, label_visibility="collapsed")
+        st.markdown(
+            '<span class="section-label">Job Description</span>', unsafe_allow_html=True
+        )
+        jd_text = st.text_area(
+            " ",
+            placeholder="Paste the full job description here…",
+            height=200,
+            label_visibility="collapsed",
+        )
     with col2:
-        st.markdown('<span class="section-label">Job Title</span>', unsafe_allow_html=True)
-        jd_title = st.text_input(" ", placeholder="e.g. Product Manager", label_visibility="collapsed")
+        st.markdown(
+            '<span class="section-label">Job Title</span>', unsafe_allow_html=True
+        )
+        jd_title = st.text_input(
+            " ", placeholder="e.g. Product Manager", label_visibility="collapsed"
+        )
         st.markdown("<br>", unsafe_allow_html=True)
         if st.session_state.guest_mode:
-            st.markdown('<div class="info-strip">⚡ Results won\'t be saved in guest mode.</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="info-strip">⚡ Results won\'t be saved in guest mode.</div>',
+                unsafe_allow_html=True,
+            )
         else:
-            st.markdown('<div class="info-strip">💾 Results will be saved to your history.</div>', unsafe_allow_html=True)
+            st.markdown(
+                '<div class="info-strip">💾 Results will be saved to your history.</div>',
+                unsafe_allow_html=True,
+            )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -468,6 +565,7 @@ def page_analyze(analyzer: ResumeAnalyzerService) -> None:
                 resume = analyzer.parse_resume(str(file_path))
                 job_description = JobDescription(
                     id=None,
+                    user_id=None,
                     title=jd_title or "Untitled Role",
                     content=jd_text,
                 )
@@ -499,17 +597,25 @@ def page_results() -> None:
         return
 
     st.markdown('<h2 class="page-title">Match Report</h2>', unsafe_allow_html=True)
-    st.markdown(f'<p class="page-sub">Role: <strong>{jd_title}</strong></p>', unsafe_allow_html=True)
+    st.markdown(
+        f'<p class="page-sub">Role: <strong>{jd_title}</strong></p>',
+        unsafe_allow_html=True,
+    )
 
     render_score_card(result.report.score)
 
     st.markdown('<div class="result-card">', unsafe_allow_html=True)
-    st.markdown('<div class="result-card-header">⚠ Missing Keywords</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="result-card-header">⚠ Missing Keywords</div>',
+        unsafe_allow_html=True,
+    )
     render_keywords(result.report.missing_keywords)
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="result-card">', unsafe_allow_html=True)
-    st.markdown('<div class="result-card-header">🔍 AI Critique</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="result-card-header">🔍 AI Critique</div>', unsafe_allow_html=True
+    )
     st.markdown('<div class="critique-wrap">', unsafe_allow_html=True)
     st.write_stream(stream_text(result.report.critique))
     st.markdown("</div></div>", unsafe_allow_html=True)
@@ -536,7 +642,10 @@ def page_sessions(session_repo: AnalysisSessionRepository) -> None:
     render_nav()
 
     st.markdown('<h2 class="page-title">Analysis History</h2>', unsafe_allow_html=True)
-    st.markdown('<p class="page-sub">All your past resume analyses, newest first.</p>', unsafe_allow_html=True)
+    st.markdown(
+        '<p class="page-sub">All your past resume analyses, newest first.</p>',
+        unsafe_allow_html=True,
+    )
 
     user_id = st.session_state.user_id
     if user_id is None:
@@ -566,9 +675,12 @@ def page_sessions(session_repo: AnalysisSessionRepository) -> None:
         for s in sessions:
             score = s.similarity_score
             color = score_color(score)
-            date_str = s.analyzed_at.strftime("%b %d, %Y  %H:%M") if s.analyzed_at else "—"
+            date_str = (
+                s.analyzed_at.strftime("%b %d, %Y  %H:%M") if s.analyzed_at else "—"
+            )
             badge = session_badge_html(score)
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div class="session-row">
                 <div>
                     <div style="font-size:0.88rem;font-weight:600;color:#1e1b4b;">Session #{s.id}</div>
@@ -579,7 +691,9 @@ def page_sessions(session_repo: AnalysisSessionRepository) -> None:
                     <div class="session-score" style="color:{color};">{score:.1f}%</div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
         st.markdown(
             f'<p style="color:#9ca3af;font-size:0.76rem;margin-top:0.8rem;">{len(sessions)} session(s) total</p>',
@@ -596,26 +710,31 @@ def page_sessions(session_repo: AnalysisSessionRepository) -> None:
 
 # ── Services ──────────────────────────────────────────────────────────────────
 
+
 def build_services() -> tuple[ResumeAnalyzerService, AuthService]:
     settings = load_settings()
     database = Database(settings["db"])
     resume_repo = ResumeRepository(database)
     session_repo = AnalysisSessionRepository(database)
+    jd_repo = JobDescriptionRepository(database)
     user_repo = UserRepository(database)
     engine = OllamaSemanticEngine(
         embedding_model=settings["embedding_model"],
         chat_model=settings["chat_model"],
         host=settings["ollama_host"],
     )
-    analyzer = ResumeAnalyzerService(resume_repo, session_repo, engine)
+    analyzer = ResumeAnalyzerService(resume_repo, session_repo, jd_repo, engine)
     auth = AuthService(user_repo)
     return analyzer, auth
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
+
 def main() -> None:
-    st.set_page_config(page_title="AI Resume Analyzer", page_icon="📄", layout="centered")
+    st.set_page_config(
+        page_title="AI Resume Analyzer", page_icon="📄", layout="centered"
+    )
     inject_css()
 
     for key, default in [
@@ -655,3 +774,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
