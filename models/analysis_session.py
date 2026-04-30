@@ -16,3 +16,4 @@ class AnalysisSession:
     similarity_score: float
     gap_report: str
     analyzed_at: Optional[datetime] = None
+    missing_keywords: list | None = None
