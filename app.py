@@ -54,7 +54,14 @@ def inject_css() -> None:
 
 
     /* ── Hero ── */
-    .hero-header { text-align: center; padding: 3.2rem 0 2rem 0; }
+    .hero-header {
+        text-align: center;
+        padding: 3.2rem 0 2rem 0;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     .hero-eyebrow {
         font-size: 0.67rem; font-weight: 600; letter-spacing: 0.22em;
         text-transform: uppercase; color: #60a5fa; display: block; margin-bottom: 0.8rem;
@@ -68,6 +75,7 @@ def inject_css() -> None:
     }
     .hero-title span { color: #3b82f6; }
     .hero-subtitle {
+        text-align: center;
         font-size: 1rem; color: #94a3b8;
         max-width: 480px; margin: 0 auto; line-height: 1.65;
     }
