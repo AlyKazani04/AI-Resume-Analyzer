@@ -496,8 +496,6 @@ def page_analyze(analyzer: ResumeAnalyzerService) -> None:
                         id=None,
                         title=jd_title or "Untitled Role",
                         content=jd_text,
-                        user_id=st.session_state.user_id,
-                        content_hash=None,
                     )
                     persist = st.session_state.user_id is not None
                     result = analyzer.analyze(
