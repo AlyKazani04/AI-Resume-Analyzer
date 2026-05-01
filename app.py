@@ -40,6 +40,11 @@ def inject_css() -> None:
         color: #e2e8f0 !important;
         font-family: 'DM Sans', sans-serif !important;
     }
+    /* ── Nav button fix — no text wrapping ── */
+    [data-testid="stButton"] > button {
+        white-space: nowrap !important;
+        min-width: fit-content !important;
+    }
 
     [data-testid="stMainBlockContainer"] {
         max-width: 840px !important;
@@ -414,17 +419,11 @@ def session_badge_html(score: float) -> str:
 
 def render_nav() -> None:
     label = "Guest Session" if st.session_state.guest_mode else "Signed in"
-    c1, c2, c3, c4 = st.columns([3, 2.2, 1.2, 1])
+    c1, c2, c3, c4 = st.columns([3, 2.5, 1, 1])
     with c1:
-        st.markdown(
-            '<div class="nav-logo">Resume<span>Analyzer</span></div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown('<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True)
     with c2:
-        st.markdown(
-            f'<div class="nav-badge"><span class="nav-dot"></span>{label}</div>',
-            unsafe_allow_html=True,
-        )
+        st.markdown(f'<div class="nav-badge"><span class="nav-dot"></span>{label}</div>', unsafe_allow_html=True)
     with c3:
         st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
         if st.button("History", key="nav_history"):
