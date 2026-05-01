@@ -100,6 +100,7 @@ class ResumeAnalyzerService:
                 resume_id=resume_id,
                 jd_id=jd_id,
                 similarity_score=score,
+                llm_score=report.score,
                 gap_report=report.critique,
             )
             session.missing_keywords = report.missing_keywords
