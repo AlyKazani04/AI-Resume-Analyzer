@@ -421,9 +421,14 @@ def render_nav() -> None:
     label = "Guest Session" if st.session_state.guest_mode else "Signed in"
     c1, c2, c3, c4 = st.columns([3, 2.5, 1, 1])
     with c1:
-        st.markdown('<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True
+        )
     with c2:
-        st.markdown(f'<div class="nav-badge"><span class="nav-dot"></span>{label}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="nav-badge"><span class="nav-dot"></span>{label}</div>',
+            unsafe_allow_html=True,
+        )
     with c3:
         st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
         if st.button("History", key="nav_history"):
@@ -716,7 +721,7 @@ def page_sessions(session_repo: AnalysisSessionRepository) -> None:
         )
     else:
         for s in sessions:
-            score = s.similarity_score
+            score = s.llm_score
             color = score_color(score)
             date_str = (
                 s.analyzed_at.strftime("%b %d, %Y  %H:%M") if s.analyzed_at else "—"

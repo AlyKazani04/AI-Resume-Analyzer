@@ -14,6 +14,7 @@ class AnalysisSession:
     resume_id: int
     jd_id: int
     similarity_score: float
+    llm_score: float
     gap_report: str
     analyzed_at: Optional[datetime] = None
     missing_keywords: list | None = None
