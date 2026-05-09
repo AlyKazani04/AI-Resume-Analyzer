@@ -44,20 +44,29 @@ class OllamaSemanticEngine:
 
     def gap_analysis(self, resume_text: str, jd_text: str) -> MatchReport:
         """Generate a strict recruiter-style gap report."""
-        prompt = (
-            "You are a strict recruiter. Compare the resume against the job description. "
-            "Return ONLY valid JSON with keys: score (0-100), missing_keywords (list of 5), critique. "
-            "Do not include markdown or extra text. Example: "
-            '{"score": 72, "missing_keywords": ["sql", "aws"], "critique": "..."}'
-        )
-        user_content = (
-            "JOB DESCRIPTION:\n"
-            f"{jd_text}\n\n"
-            "RESUME:\n"
-            f"{resume_text}"
-        )
+        prompt = """
+            You are a cynical, high-stakes technical recruiter. Your goal is to find reasons to REJECT candidates. 
+
+            SCORING RUBRIC:
+            - 0-30: No relevant experience or wrong industry.
+            - 31-60: Missing 2+ core technical requirements.
+            - 61-80: Solid match but missing "nice-to-have" keywords.
+            - 81-100: Exceptional match; exceeds requirements.
+
+            Compare the resume against the job description.
+            Return ONLY valid JSON with keys: "score", "missing_keywords" (list of 5), "critique".
+
+            [EXAMPLES]
+            Bad Match Example Score: 15
+            Good Match Example Score: 85
+
+            FORMAT:
+            {"score": [number], "missing_keywords": ["..."], "critique": "..."}
+        """
+        user_content = f"JOB DESCRIPTION:\n{jd_text}\n\nRESUME:\n{resume_text}"
         response = self.client.chat(
             model=self.chat_model,
+            format="json",
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": user_content},

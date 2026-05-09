@@ -17,8 +17,10 @@ class AnalysisSessionRepository:
 
     def create(self, session) -> int:
         query = """
-        INSERT INTO analysis_sessions (user_id, resume_id, jd_id, similarity_score, gap_report, missing_keywords)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO analysis_sessions (
+            user_id, resume_id, jd_id, similarity_score, llm_score, gap_report, missing_keywords
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         missing_json = (
             json.dumps(session.missing_keywords) if session.missing_keywords else None
@@ -33,6 +35,7 @@ class AnalysisSessionRepository:
                     session.resume_id,
                     session.jd_id,
                     session.similarity_score,
+                    session.llm_score,
                     session.gap_report,
                     missing_json,
                 ),
@@ -43,7 +46,7 @@ class AnalysisSessionRepository:
     def list_by_user(self, user_id: int) -> Iterable[AnalysisSession]:
         """List analysis sessions for a user."""
         query = (
-            "SELECT id, user_id, resume_id, jd_id, similarity_score, gap_report, missing_keywords, analyzed_at "
+            "SELECT id, user_id, resume_id, jd_id, similarity_score, llm_score, gap_report, missing_keywords, analyzed_at "
             "FROM analysis_sessions WHERE user_id = %s ORDER BY analyzed_at DESC"
         )
         with self.database.connect() as connection:
@@ -57,17 +60,18 @@ class AnalysisSessionRepository:
                 user_id=row[1],
                 resume_id=row[2],
                 jd_id=row[3],
-                similarity_score=float(row[4]),
-                gap_report=row[5],
-                analyzed_at=row[7],
+                similarity_score=100 * float(row[4]),
+                llm_score=float(row[5]),
+                gap_report=row[6],
+                analyzed_at=row[8],
             )
-            session.missing_keywords = json.loads(row[6]) if row[6] else []
+            session.missing_keywords = json.loads(row[7]) if row[7] else []
             yield session
 
     def list_all(self) -> Iterable[AnalysisSession]:
         """List all analysis sessions."""
         query = """
-        SELECT id, user_id, resume_id, jd_id, similarity_score, missing_keywords, gap_report, analyzed_at
+        SELECT id, user_id, resume_id, jd_id, similarity_score, llm_score, missing_keywords, gap_report, analyzed_at
         FROM analysis_sessions
         ORDER BY analyzed_at DESC
         """
@@ -84,8 +88,9 @@ class AnalysisSessionRepository:
                 resume_id=row[2],
                 jd_id=row[3],
                 similarity_score=float(row[4]),
-                gap_report=row[6],
-                analyzed_at=row[7],
+                llm_score=float(row[5]),
+                gap_report=row[7],
+                analyzed_at=row[8],
             )
-            session.missing_keywords = json.loads(row[5]) if row[5] else []
+            session.missing_keywords = json.loads(row[6]) if row[6] else []
             yield session

@@ -14,8 +14,8 @@ def load_settings() -> dict:
     load_dotenv()
 
     return {
-        "embedding_model": os.getenv("OLLAMA_EMBEDDING_MODEL", "all-minilm-l6-v2"),
-        "chat_model": os.getenv("OLLAMA_CHAT_MODEL", "gemma3"),
+        "embedding_model": os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),
+        "chat_model": os.getenv("OLLAMA_CHAT_MODEL", "gemma3:latest"),
         "ollama_host": os.getenv("OLLAMA_HOST", "http://localhost:11434"),
         "db": DBConfig(
             host=os.getenv("DB_HOST", "localhost"),
