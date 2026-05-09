@@ -433,7 +433,7 @@ def render_nav() -> None:
     c1, c2, c3, c4 = st.columns([3, 2.5, 1, 1])
     with c1:
         st.markdown(
-            '<div class="nav-logo">Resume<span>AI</span></div>', unsafe_allow_html=True
+            '<div class="nav-logo">Resume<span>Analyzer</span></div>', unsafe_allow_html=True
         )
     with c2:
         st.markdown(
