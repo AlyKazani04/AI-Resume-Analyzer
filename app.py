@@ -139,11 +139,22 @@ def inject_css() -> None:
         padding: 0.55rem 1.1rem !important;
         background: transparent !important;
     }
-    [data-testid="stTabs"] button[aria-selected="true"] {
-        color: #60a5fa !important; border-bottom-color: #3b82f6 !important;
-    }
+    # [data-testid="stTabs"] button[aria-selected="true"] {
+    #     color: #60a5fa !important; border-bottom-color: #3b82f6 !important;
+    # }
     [data-testid="stTabs"] [role="tablist"] {
         border-bottom: 1px solid #1e3a5f !important; gap: 0 !important;
+    }
+    [data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+        background-color: #3b82f6 !important;
+    }
+    [data-testid="stTabs"] [role="tablist"] {
+        border-bottom: 2px solid #1e3a5f !important;
+    }
+    [data-testid="stTabs"] button:active, 
+    [data-testid="stTabs"] button:focus {
+        outline: none !important;
+        color: #60a5fa !important;
     }
 
     /* ── Inputs — FIXED cursor visibility ── */
@@ -179,7 +190,7 @@ def inject_css() -> None:
     [data-testid="stFileUploader"] {
         background: #111827 !important;
         border: 2px dashed #1e3a5f !important;
-        border-radius: 14px !important;
+        border-radius: 0.5rem !important;
     }
     [data-testid="stFileUploader"]:hover { border-color: #3b82f6 !important; }
     [data-testid="stFileUploaderDropzoneInstructions"] { color: #475569 !important; }
