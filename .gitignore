@@ -11,5 +11,3 @@ venv/
 # python cache
 __pycache__/
 
-# Schema
-schema.sql
